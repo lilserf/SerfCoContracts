@@ -35,7 +35,7 @@ namespace SerfCoContracts
         {
             switch(satType)
             {
-                case SatelliteType.SatTypeWeather: return "a docking port and at least one sensor (thermometer/barometer/etc)";
+                case SatelliteType.SatTypeWeather: return "a docking port and a sensor";
                 case SatelliteType.SatTypeCommunications: return "a docking port and an antenna";
                 case SatelliteType.SatTypeEspionage: return "a docking port and a Small Gear Bay";
             }
@@ -66,7 +66,7 @@ namespace SerfCoContracts
         {
             mSatType = (SatelliteType)(UnityEngine.Random.Range(0, (int)SatelliteType.SatTypeCount));
 
-            if(mSatType == SatelliteType.SatTypeWeather)
+            if(mSatType == SatelliteType.SatTypeWeather || mSatType == SatelliteType.SatTypeEspionage)
             {
                 // Weather sats are always around Kerbin
                 mTargetBody = Planetarium.fetch.Home;
@@ -122,10 +122,40 @@ namespace SerfCoContracts
 
         protected override string GetSynopsys()
         {
-            return "Put a " + SatHelper.GetSatTypeString(mSatType) + " satellite containing "+SatHelper.GetRequiredParts(mSatType)+" into orbit around " + mTargetBody.theName + ".";
+            return "Orbit a " + SatHelper.GetSatTypeString(mSatType) + " satellite containing "+SatHelper.GetRequiredParts(mSatType)+" around " + mTargetBody.theName;
         }
 
         protected override string GetDescription()
+        {
+            switch(mSatType)
+            {
+                case SatelliteType.SatTypeCommunications: return GetDefaultDescription();
+                case SatelliteType.SatTypeWeather: return GetWeatherDescription();
+                case SatelliteType.SatTypeEspionage: return GetEspionageDescription();
+            }
+
+            return GetDefaultDescription();
+        }
+
+        private string GetWeatherDescription()
+        {
+            var desc = "In order to better understand the weather of our beloved home planet, we need to observe and measure it from space!\n\n"
+                + "We need you to launch a satellite with a thermometer or barometer on it that we can use to continuously monitor the temperature "
+                + "and barometric pressure on Kerbin. Those sensors will work correctly from space, right?";
+
+            return desc;
+        }
+
+        private string GetEspionageDescription()
+        {
+            var desc = "Uh, yes, we're here from the agency stated in the contract. Pay no attention to our dark suits and sunglasses.\n\n"
+               + "We need you to put a satellite in orbit that has a very... specific piece of gear on board. It may look like a simple "
+               + "landing gear pod, but we've modified it to suit our needs. Please place it into the specified orbit and DON'T TELL ANYONE.";
+
+            return desc;
+        }
+
+        private string GetDefaultDescription()
         {
             return TextGen.GenerateBackStories(Agent.Name, Agent.GetMindsetString(), "satellites", "satellites", "science", new System.Random().Next());
         }
@@ -155,6 +185,10 @@ namespace SerfCoContracts
 
         public override bool MeetRequirements()
         {
+            // Temp: always available
+            return true;
+
+
             string[] parts =
             {
                 "probeCoreCube",

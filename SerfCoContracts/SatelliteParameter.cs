@@ -77,7 +77,7 @@ namespace SerfCoContracts
 
         protected override string GetTitle()
         {
-            return "Build an unmanned " + SatHelper.GetSatTypeString(mSatType) + " satellite that includes "+SatHelper.GetRequiredParts(mSatType)+".";
+            return "Build an unmanned " + SatHelper.GetSatTypeString(mSatType) + " satellite that includes "+SatHelper.GetRequiredParts(mSatType);
         }
 
         protected override string GetHashString()
