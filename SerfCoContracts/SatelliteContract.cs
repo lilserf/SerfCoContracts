@@ -42,6 +42,81 @@ namespace SerfCoContracts
 
             return "unknown";
         }
+
+        public static string GenerateRandomSatName(SatelliteType satType)
+        {
+            string word = "SAT";
+
+            if(satType == SatelliteType.SatTypeCommunications)
+            {
+                word = GenerateRandomCommName();
+            }
+            else if(satType == SatelliteType.SatTypeWeather)
+            {
+                word = GenerateRandomWeatherName();
+            }
+            else if(satType == SatelliteType.SatTypeEspionage)
+            {
+                word = GenerateRandomEspionageName();
+            }
+
+            int num = (int)(UnityEngine.Random.Range(0, 50));
+
+            return word + "-" + num.ToString();
+        }
+
+        private static string GenerateRandomWeatherName()
+        {
+            string[] names = { "NIMBUS", "CIRRUS", "STRATUS", "METEOR", "KOAA", "BLIZZARD", "TYPHOON", "TORNADO" };
+
+            return names[(int)UnityEngine.Random.Range(0, names.Length)];
+        }
+
+        private static string GenerateRandomCommName()
+        {
+            string[] pre = { "TEL", "COM", "SYN", "RELAY", "ECHO", "KERB", "K-" };
+            string[] post = { "STAR", "SAT", "COM", "" };
+
+            string first = pre[(int)UnityEngine.Random.Range(0, pre.Length)];
+            string second = pre[(int)UnityEngine.Random.Range(0, post.Length)];
+
+            return first + second;
+        }
+
+        private static string GenerateRandomEspionageName()
+        {
+            string[] names = 
+            {
+                "ARCTIC",
+                "BLUE",
+                "CONCORD",
+                "DEFECT",
+                "ENSURE",
+                "FORESIGHT",
+                "GREEN",
+                "HEAT",
+                "ICEBERG",
+                "JUSTIFY",
+                "KEYHOLE",
+                "LIME",
+                "MELTDOWN",
+                "NERVE",
+                "ORGAN",
+                "PROPER",
+                "QUIET",
+                "REFLECT",
+                "SANITY",
+                "TRUST",
+                "UNITE",
+                "VENOM",
+                "WORTHY",
+                "XRAY",
+                "YELLOW",
+                "ZINC"
+            };
+
+            return names[(int)UnityEngine.Random.Range(0, names.Length)];
+        }
     }
 
     public class SatelliteContract : Contract
@@ -49,6 +124,7 @@ namespace SerfCoContracts
 
         CelestialBody mTargetBody;
         SatelliteType mSatType;
+        String mSatName;
 
         private CelestialBody ChooseTargetBody()
         {
@@ -81,6 +157,8 @@ namespace SerfCoContracts
                 mTargetBody = Planetarium.fetch.Home;
             }
 
+            mSatName = SatHelper.GenerateRandomSatName(mSatType);
+
             base.SetExpiry();
             base.SetDeadlineYears(2, mTargetBody);
             base.SetFunds(1000, 1000, mTargetBody);
@@ -99,6 +177,13 @@ namespace SerfCoContracts
             ResearchAndDevelopment.AddExperimentalPart(ap);
         }
 
+        protected override void OnCompleted()
+        {
+            var v = FlightGlobals.ActiveVessel;
+
+            v.vesselName = mSatName;
+        }
+
         public override bool CanBeCancelled()
         {
             return true;
@@ -111,18 +196,18 @@ namespace SerfCoContracts
 
         protected override string GetHashString()
         {
-            return "Satellite" + mTargetBody.bodyName;
+            return "Satellite" + mSatName;
         }
 
         
         protected override string GetTitle()
         {
-            return "Orbit a "+SatHelper.GetSatTypeString(mSatType)+" satellite around " + mTargetBody.theName;
+            return "Orbit "+SatHelper.GetSatTypeString(mSatType)+" satellite "+mSatName+" around " + mTargetBody.theName;
         }
 
         protected override string GetSynopsys()
         {
-            return "Orbit a " + SatHelper.GetSatTypeString(mSatType) + " satellite containing "+SatHelper.GetRequiredParts(mSatType)+" around " + mTargetBody.theName;
+            return "Orbit " + SatHelper.GetSatTypeString(mSatType) + " satellite "+mSatName+" containing "+SatHelper.GetRequiredParts(mSatType)+" around " + mTargetBody.theName;
         }
 
         protected override string GetDescription()
@@ -148,7 +233,7 @@ namespace SerfCoContracts
 
         private string GetEspionageDescription()
         {
-            var desc = "Uh, yes, we're here from the agency stated in the contract. Pay no attention to our dark suits and sunglasses.\n\n"
+            var desc = "Uh, yes, we're here from "+this.Agent.Name+". Pay no attention to our dark suits and sunglasses.\n\n"
                + "We need you to put a satellite in orbit that has a very... specific piece of gear on board. It may look like a simple "
                + "landing gear pod, but we've modified it to suit our needs. Please place it into the specified orbit and DON'T TELL ANYONE.";
 
@@ -174,6 +259,7 @@ namespace SerfCoContracts
                     mTargetBody = body;
             }
             mSatType = (SatelliteType)(int.Parse(node.GetValue("satType")));
+            mSatName = node.GetValue("satName");
         }
 
         protected override void OnSave(ConfigNode node)
@@ -181,6 +267,7 @@ namespace SerfCoContracts
             int bodyID = mTargetBody.flightGlobalsIndex;
             node.AddValue("targetBody", bodyID);
             node.AddValue("satType", (int)mSatType);
+            node.AddValue("satName", mSatName);
         }
 
         public override bool MeetRequirements()
