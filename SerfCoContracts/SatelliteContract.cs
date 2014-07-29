@@ -168,6 +168,14 @@ namespace SerfCoContracts
             AddParameter(new SatelliteParameter(mSatType));
             AddParameter(new LocationAndSituationParameter(mTargetBody, Vessel.Situations.ORBITING, SatHelper.GetSatTypeString(mSatType)+" satellite"));
 
+            // Randomly add an altitude window
+            if(UnityEngine.Random.Range(0,100) > 50)
+            {
+                var targetAlt = UnityEngine.Mathf.Floor(UnityEngine.Random.Range(1200, 5000)) * 100;
+                var altWindow = UnityEngine.Mathf.Floor(UnityEngine.Random.Range(100, 500)) * 100;
+                AddParameter(new OrbitalParameter(targetAlt, altWindow));
+            }
+
             return true;
         }
 

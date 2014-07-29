@@ -45,6 +45,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OrbitalParameter.cs" />
     <Compile Include="SatelliteContract.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SatelliteParameter.cs" />

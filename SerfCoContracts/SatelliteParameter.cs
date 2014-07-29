@@ -89,8 +89,6 @@ namespace SerfCoContracts
         {
             Vessel v = FlightGlobals.ActiveVessel;
 
-            //Debug.Log("[SatelliteParameter] OnUpdate");
-
             if (v != null)
             {
                 if(v.GetCrewCapacity() > 0 || v.FindPartModulesImplementing<ModuleDockingNode>().Count() == 0)
